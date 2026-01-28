@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MN X NAIM LIVE 🔴</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:'Inter','Roboto Mono',sans-serif;
+  background:#02090c;
+  color:#fff;
+}
+.header{
+  text-align:center;
+  padding:22px;
+  font-size:34px;
+  font-weight:700;
+  color:#ffdd00;
+  text-shadow:0 0 20px #ffdd00;
+}
+#listPage{
+  max-width:650px;
+  margin:auto;
+  padding:12px;
+}
+.match-card{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px;
+  margin:16px 0;
+  border-radius:24px;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  box-shadow:0 0 25px rgba(0,0,0,.6);
+  cursor:pointer;
+  transition:.25s;
+}
+.match-card:hover{transform:scale(1.03);}
+.flag{
+  width:52px;
+  height:34px;
+  border-radius:6px;
+}
+.match-info{
+  flex:1;
+  text-align:center;
+}
+.match-title{
+  font-size:26px;
+  font-weight:700;
+}
+.match-sub{
+  font-size:16px;
+  color:#ccc;
+  margin-top:4px;
+}
+.countdown{
+  margin-top:6px;
+  font-size:14px;
+}
+.live-badge{
+  position:absolute;
+  top:12px;
+  right:12px;
+  background:#ff002b;
+  color:#fff;
+  padding:6px 14px;
+  border-radius:16px;
+  font-weight:800;
+  font-size:13px;
+  animation:blink 1s infinite;
+  display:none;
+}
+@keyframes blink{
+  0%{opacity:1;box-shadow:0 0 10px red;}
+  50%{opacity:.5;}
+  100%{opacity:1;}
+}
+
+/* PLAYER PAGE */
+#playerPage{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:999;
+  padding:18px;
+}
+.back{
+  font-size:18px;
+  color:#38f2e0;
+  cursor:pointer;
+  margin-bottom:12px;
+}
+.player-title{
+  text-align:center;
+  font-size:26px;
+  font-weight:700;
+  color:#ffdd00;
+  margin-bottom:12px;
+}
+video{
+  width:100%;
+  height:280px;
+  border-radius:16px;
+  background:#000;
+}
+.source-btn{
+  width:100%;
+  padding:14px;
+  margin:10px 0;
+  border:none;
+  border-radius:16px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  background:linear-gradient(90deg,#ff004c,#ffb300,#00e5ff,#ff004c);
+  background-size:300% 300%;
+  animation:rgb 6s linear infinite;
+  color:#fff;
+}
+@keyframes rgb{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+.telegram{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:16px 24px;
+  background:linear-gradient(90deg,#0088cc,#00f2ff);
+  border-radius:28px;
+  font-weight:700;
+  color:#fff;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">MN X NAIM LIVE 🔴</div>
+<div id="listPage"></div>
+
+<div id="playerPage">
+  <div class="back" onclick="goBack()">← Back</div>
+  <div class="player-title" id="playerTitle"></div>
+  <video id="video" controls playsinline></video>
+  <div id="sources"></div>
+</div>
+
+<a class="telegram" href="https://t.me/+EUu_2FFLJsdmMGU9" target="_blank">Join Telegram</a>
+
+<script>
+let hls, shakaPlayer;
+const video=document.getElementById("video");
+
+const matches=[
+{
+ title:"RSA vs WI",
+ sub:"1st T20 • 08:00 PM",
+ left:"https://flagcdn.com/w80/za.png",
+ right:"https://flagcdn.com/w80/vc.png",
+ start:"2026-01-27T20:00:00",
+ sources:[
+  {name:"FOX Sports 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"},
+  {name:"Cricbuzz 1",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=303629"},
+  {name:"Super Sports",link:"https://allinonereborn.xyz/vip/live.php?id=778400"},
+  {name:"Willow",link:"https://allinonereborn.xyz/vip/live.php?id=778395"}
+ ]
+},
+{
+ title:"IND vs NZ",
+ sub:"4th T20 • 07:30 PM",
+ left:"https://flagcdn.com/w80/in.png",
+ right:"https://flagcdn.com/w80/nz.png",
+ start:"2026-01-28T19:30:00",
+ sources:[
+  {name:"FOX Sports 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"},
+  {name:"Sky Sports Cricket",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=10527"},
+  {name:"TNT Sports 1",link:"https://allinonereborn.xyz/vip/live.php?id=1084873"},
+  {name:"Willow",link:"https://allinonereborn.xyz/vip/live.php?id=778395"}
+ ]
+},
+{
+ title:"AUS vs WI",
+ sub:"U19 WC • 01:00 PM",
+ left:"https://flagcdn.com/w80/au.png",
+ right:"https://flagcdn.com/w80/vc.png",
+ start:"2026-01-28T13:00:00",
+ sources:[
+  {name:"FOX Sports 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"},
+  {name:"Sky Sports Cricket",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=10527"},
+  {name:"TNT Sports 1",link:"https://allinonereborn.xyz/vip/live.php?id=1084873"},
+  {name:"Willow",link:"https://allinonereborn.xyz/vip/live.php?id=778395"}
+ ]
+},
+{
+ title:"BAN W vs TH W",
+ sub:"2nd ODI • 09:15 AM",
+ left:"https://flagcdn.com/w80/bd.png",
+ right:"https://flagcdn.com/w80/th.png",
+ start:"2026-01-28T09:15:00",
+ sources:[
+  {name:"FOX Sports 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"},
+  {name:"Sky Sports Cricket",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=10527"},
+  {name:"TNT Sports 1",link:"https://allinonereborn.xyz/vip/live.php?id=1084873"},
+  {name:"Willow",link:"https://allinonereborn.xyz/vip/live.php?id=778395"}
+ ]
+},
+{
+ title:"SL vs RSA",
+ sub:"U19 WC • 01:00 PM",
+ left:"https://flagcdn.com/w80/lk.png",
+ right:"https://flagcdn.com/w80/za.png",
+ start:"2026-01-29T13:00:00",
+ sources:[
+  {name:"FOX Sports 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"},
+  {name:"Sky Sports Cricket",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=10527"},
+  {name:"TNT Sports 1",link:"https://allinonereborn.xyz/vip/live.php?id=1084873"},
+  {name:"Willow",link:"https://allinonereborn.xyz/vip/live.php?id=778395"}
+ ]
+}
+];
+
+const list=document.getElementById("listPage");
+
+matches.forEach(m=>{
+ const card=document.createElement("div");
+ card.className="match-card";
+ const live=document.createElement("div");
+ live.className="live-badge";
+ live.innerText="LIVE";
+ card.appendChild(live);
+
+ card.innerHTML+=`
+ <img class="flag" src="${m.left}">
+ <div class="match-info">
+  <div class="match-title">${m.title}</div>
+  <div class="match-sub">${m.sub}</div>
+  <div class="countdown">Loading...</div>
+ </div>
+ <img class="flag" src="${m.right}">
+ `;
+ card.onclick=()=>openMatch(m);
+ list.appendChild(card);
+
+ const cd=card.querySelector(".countdown");
+ const start=new Date(m.start);
+
+ setInterval(()=>{
+  const diff=start-new Date();
+  if(diff<=0){
+    cd.innerText="";
+    live.style.display="block";
+  }else{
+    const h=Math.floor(diff/36e5);
+    const min=Math.floor(diff%36e5/6e4);
+    cd.innerText=`Starts in ${h}h ${min}m`;
+  }
+ },1000);
+});
+
+function openMatch(m){
+ document.getElementById("listPage").style.display="none";
+ document.getElementById("playerPage").style.display="block";
+ document.getElementById("playerTitle").innerText=m.title+" • "+m.sub;
+ const s=document.getElementById("sources");
+ s.innerHTML="";
+ m.sources.forEach(src=>{
+  const b=document.createElement("button");
+  b.className="source-btn";
+  b.innerText=src.name;
+  b.onclick=()=>loadStream(src.link);
+  s.appendChild(b);
+ });
+ loadStream(m.sources[0].link);
+}
+
+function loadStream(url){
+ destroyPlayers();
+ if(Hls.isSupported()){
+  hls=new Hls();
+  hls.loadSource(url);
+  hls.attachMedia(video);
+  hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play());
+ }else{
+  shakaPlayer=new shaka.Player(video);
+  shakaPlayer.load(url).then(()=>video.play());
+ }
+}
+
+function destroyPlayers(){
+ if(hls){hls.destroy();hls=null;}
+ if(shakaPlayer){shakaPlayer.destroy();shakaPlayer=null;}
+ video.pause();
+ video.removeAttribute("src");
+}
+
+function goBack(){
+ destroyPlayers();
+ document.getElementById("playerPage").style.display="none";
+ document.getElementById("listPage").style.display="block";
+}
+</script>
+
+</body>
+</html>
