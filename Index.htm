@@ -3,284 +3,148 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MN X NAIM LIVE 🔴</title>
+<title>MN X NAIM • DASH LIVE</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- Shaka Player -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
 
 <style>
 body{
   margin:0;
-  font-family:'Inter','Roboto Mono',sans-serif;
   background:#02090c;
   color:#fff;
+  font-family:Arial, sans-serif;
 }
 .header{
   text-align:center;
-  padding:22px;
-  font-size:34px;
-  font-weight:700;
-  color:#ff2a2a;
-  text-shadow:0 0 25px #ff2a2a;
-}
-#listPage{max-width:650px;margin:auto;padding:12px;}
-.match-card{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
   padding:18px;
-  margin:16px 0;
-  border-radius:22px;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  box-shadow:0 0 25px rgba(0,0,0,.6);
-  cursor:pointer;
-  position:relative;
-}
-.flag{width:52px;height:34px;border-radius:6px;}
-.match-info{text-align:center;flex:1;}
-.match-title{font-size:26px;font-weight:700;}
-.match-sub{font-size:16px;color:#ccc;margin-top:4px;}
-.countdown{font-size:13px;margin-top:4px;}
-
-.live-badge{
-  position:absolute;
-  top:10px;
-  right:12px;
-  padding:6px 14px;
-  border-radius:14px;
-  font-weight:800;
-  font-size:13px;
-  background:#ff0000;
-  color:#fff;
-  box-shadow:0 0 15px #ff0000;
-  animation:pulse 1.2s infinite;
-}
-
-@keyframes pulse{
-  0%{transform:scale(1)}
-  50%{transform:scale(1.12)}
-  100%{transform:scale(1)}
-}
-
-/* PLAYER PAGE */
-#playerPage{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:#000;
-  z-index:999;
-  padding:16px;
-}
-.back{
-  color:#38f2e0;
-  font-weight:600;
-  cursor:pointer;
-  margin-bottom:10px;
-}
-.player-title{
-  text-align:center;
   font-size:26px;
   font-weight:700;
   color:#ffdd00;
-  margin:10px 0;
+}
+.live-badge{
+  display:inline-block;
+  margin-left:10px;
+  padding:4px 12px;
+  background:#ff0033;
+  border-radius:14px;
+  font-size:14px;
+  font-weight:700;
+  animation:pulse 1.2s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 rgba(255,0,51,.8)}
+  70%{box-shadow:0 0 20px rgba(255,0,51,.8)}
+  100%{box-shadow:0 0 0 rgba(255,0,51,.8)}
+}
+.player-box{
+  max-width:900px;
+  margin:12px auto;
+  background:#000;
+  border-radius:14px;
+  overflow:hidden;
 }
 video{
   width:100%;
-  height:260px;
+  height:auto;
   background:#000;
-  border-radius:14px;
 }
-.source-btn{
+.servers, .quality{
+  max-width:900px;
+  margin:12px auto;
+}
+.btn{
   width:100%;
   padding:14px;
-  margin:10px 0;
+  margin:8px 0;
   border:none;
-  border-radius:16px;
+  border-radius:14px;
   font-size:16px;
   font-weight:700;
   cursor:pointer;
-  background:linear-gradient(90deg,#ff004c,#ffb300,#00e5ff);
+  background:linear-gradient(90deg,#ff004c,#ffb300,#00e5ff,#ff004c);
+  background-size:300% 300%;
+  animation:rgb 6s linear infinite;
   color:#fff;
 }
-.controls{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
+.qbtn{
+  background:#111;
+  border:1px solid #333;
+  animation:none;
 }
-.ctrl{
-  flex:1;
-  padding:14px;
-  border:none;
-  border-radius:14px;
-  font-weight:700;
-}
-.telegram{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  padding:14px 22px;
-  background:#0088cc;
-  border-radius:28px;
-  font-weight:700;
-  color:#fff;
-  text-decoration:none;
+@keyframes rgb{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">MN X NAIM LIVE 🔴</div>
-<div id="listPage"></div>
-
-<div id="playerPage">
-  <div class="back" onclick="goBack()">← Back</div>
-  <div class="player-title" id="playerTitle"></div>
-  <video id="video" controls playsinline></video>
-  <div id="sources"></div>
+<div class="header">
+  MN X NAIM LIVE
+  <span class="live-badge">LIVE</span>
 </div>
 
-<a class="telegram" href="https://t.me/+EUu_2FFLJsdmMGU9" target="_blank">Join Telegram</a>
+<div class="player-box">
+  <video id="video" controls playsinline></video>
+</div>
+
+<div class="servers">
+  <button class="btn" onclick="loadStream(0)">Server 1</button>
+  <button class="btn" onclick="loadStream(1)">Server 2</button>
+</div>
+
+<div class="quality">
+  <button class="btn qbtn" onclick="setQuality('auto')">Auto Quality</button>
+  <button class="btn qbtn" onclick="setQuality(360)">360p</button>
+  <button class="btn qbtn" onclick="setQuality(720)">720p</button>
+  <button class="btn qbtn" onclick="setQuality(1080)">1080p</button>
+</div>
 
 <script>
-let hls=null, shakaPlayer=null;
-const video=document.getElementById("video");
+let player;
+const video = document.getElementById("video");
 
-function playStream(url){
-  if(hls){hls.destroy();hls=null;}
-  if(shakaPlayer){shakaPlayer.destroy();shakaPlayer=null;}
-  video.src="";
-
-  if(url.includes(".mpd")){
-    shaka.polyfill.installAll();
-    shakaPlayer=new shaka.Player(video);
-    shakaPlayer.load(url).then(()=>video.play());
-  }else{
-    if(Hls.isSupported()){
-      hls=new Hls();
-      hls.loadSource(url);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play());
-    }else{
-      video.src=url;
-      video.play();
-    }
-  }
-}
-
-const matches=[
-{
- title:"RSA vs WI",
- sub:"1st T20 • 08:00 PM",
- left:"https://flagcdn.com/w80/za.png",
- right:"https://flagcdn.com/w80/vc.png",
- start:"2026-01-27T20:00:00",
- sources:[
-  {name:"FOX Sports 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"},
-  {name:"Cricbuzz",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=303629"},
-  {name:"Super Sports",link:"https://allinonereborn.xyz/vip/live.php?id=778400"},
-  {name:"Willow",link:"https://allinonereborn.xyz/vip/live.php?id=778395"}
- ]
-},
-{
- title:"IND vs NZ",
- sub:"4th T20 • 07:30 PM",
- left:"https://flagcdn.com/w80/in.png",
- right:"https://flagcdn.com/w80/nz.png",
- start:"2026-01-28T19:30:00",
- sources:[
-  {name:"FOX 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"},
-  {name:"Sky Sports",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=10527"},
-  {name:"TNT Sports 1",link:"https://allinonereborn.xyz/vip/live.php?id=1084873"},
-  {name:"Willow",link:"https://allinonereborn.xyz/vip/live.php?id=778395"}
- ]
-},
-{
- title:"AUS vs WI",
- sub:"U19 WC • 01:00 PM",
- left:"https://flagcdn.com/w80/au.png",
- right:"https://flagcdn.com/w80/vc.png",
- start:"2026-01-28T13:00:00",
- sources:[{name:"FOX 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"}]
-},
-{
- title:"BAN W vs TH W",
- sub:"2nd ODI • 09:15 AM",
- left:"https://flagcdn.com/w80/bd.png",
- right:"https://flagcdn.com/w80/th.png",
- start:"2026-01-28T09:15:00",
- sources:[{name:"FOX 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"}]
-},
-{
- title:"SL vs RSA",
- sub:"U19 WC • 01:00 PM",
- left:"https://flagcdn.com/w80/lk.png",
- right:"https://flagcdn.com/w80/za.png",
- start:"2026-01-29T13:00:00",
- sources:[{name:"FOX 501",link:"https://allinonereborn.xyz/mix.m3u8/live4.php?id=197185"}]
-}
+const streams = [
+  "http://103.169.98.238:8080/live/0300511616RGB/0300511616RGB/247170.ts?token=dG5HV0NNYW93WUJwTFpk",
+  "https://example.com/live2.mpd"
 ];
 
-const list=document.getElementById("listPage");
-
-matches.forEach(m=>{
- const card=document.createElement("div");
- card.className="match-card";
- card.innerHTML=`
-  <img class="flag" src="${m.left}">
-  <div class="match-info">
-    <div class="match-title">${m.title}</div>
-    <div class="match-sub">${m.sub}</div>
-    <div class="countdown"></div>
-  </div>
-  <img class="flag" src="${m.right}">
- `;
- list.appendChild(card);
-
- const cd=card.querySelector(".countdown");
- const start=new Date(m.start);
-
- setInterval(()=>{
-  const diff=start-new Date();
-  if(diff<=0){
-    cd.innerHTML="";
-    if(!card.querySelector(".live-badge")){
-      const b=document.createElement("div");
-      b.className="live-badge";
-      b.innerText="LIVE";
-      card.appendChild(b);
-    }
-  }else{
-    const h=Math.floor(diff/36e5);
-    const mi=Math.floor(diff%36e5/6e4);
-    cd.innerText=`Starts in ${h}h ${mi}m`;
+async function init(){
+  shaka.polyfill.installAll();
+  if(!shaka.Player.isBrowserSupported()){
+    alert("Browser not supported");
+    return;
   }
- },1000);
-
- card.onclick=()=>{
-  document.getElementById("listPage").style.display="none";
-  document.getElementById("playerPage").style.display="block";
-  document.getElementById("playerTitle").innerText=m.title+" • "+m.sub;
-  const s=document.getElementById("sources");
-  s.innerHTML="";
-  m.sources.forEach(x=>{
-    const b=document.createElement("button");
-    b.className="source-btn";
-    b.innerText=x.name;
-    b.onclick=()=>playStream(x.link);
-    s.appendChild(b);
-  });
-  playStream(m.sources[0].link);
- };
-});
-
-function goBack(){
- video.pause();
- document.getElementById("playerPage").style.display="none";
- document.getElementById("listPage").style.display="block";
+  player = new shaka.Player(video);
+  loadStream(0);
 }
+
+async function loadStream(index){
+  try{
+    await player.load(streams[index]);
+    video.play();
+  }catch(e){
+    console.error("DASH error", e);
+    alert("Stream load failed");
+  }
+}
+
+function setQuality(q){
+  if(!player) return;
+  if(q === "auto"){
+    player.configure({abr:{enabled:true}});
+  }else{
+    player.configure({abr:{enabled:false}});
+    const tracks = player.getVariantTracks();
+    const match = tracks.find(t=>t.height===q);
+    if(match) player.selectVariantTrack(match,true);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", init);
 </script>
 
 </body>
