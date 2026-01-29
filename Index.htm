@@ -2,149 +2,59 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>DASH Player | MN X NAIM</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MN X NAIM • DASH LIVE</title>
 
-<!-- Shaka Player -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+<!-- dash.js -->
+<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 
 <style>
 body{
   margin:0;
-  background:#02090c;
+  background:#000;
   color:#fff;
   font-family:Arial, sans-serif;
 }
 .header{
   text-align:center;
-  padding:18px;
-  font-size:26px;
-  font-weight:700;
-  color:#ffdd00;
-}
-.live-badge{
-  display:inline-block;
-  margin-left:10px;
-  padding:4px 12px;
-  background:#ff0033;
-  border-radius:14px;
-  font-size:14px;
-  font-weight:700;
-  animation:pulse 1.2s infinite;
-}
-@keyframes pulse{
-  0%{box-shadow:0 0 0 rgba(255,0,51,.8)}
-  70%{box-shadow:0 0 20px rgba(255,0,51,.8)}
-  100%{box-shadow:0 0 0 rgba(255,0,51,.8)}
-}
-.player-box{
-  max-width:900px;
-  margin:12px auto;
-  background:#000;
-  border-radius:14px;
-  overflow:hidden;
+  padding:15px;
+  font-size:22px;
+  font-weight:bold;
+  color:#00e5ff;
 }
 video{
   width:100%;
-  height:auto;
-  background:#000;
-}
-.servers, .quality{
   max-width:900px;
-  margin:12px auto;
-}
-.btn{
-  width:100%;
-  padding:14px;
-  margin:8px 0;
-  border:none;
-  border-radius:14px;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-  background:linear-gradient(90deg,#ff004c,#ffb300,#00e5ff,#ff004c);
-  background-size:300% 300%;
-  animation:rgb 6s linear infinite;
-  color:#fff;
-}
-.qbtn{
-  background:#111;
-  border:1px solid #333;
-  animation:none;
-}
-@keyframes rgb{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
+  display:block;
+  margin:auto;
+  background:#000;
+  border-radius:12px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  MN X NAIM LIVE
-  <span class="live-badge">LIVE</span>
-</div>
+<div class="header">MN X NAIM DASH PLAYER 🔴</div>
 
-<div class="player-box">
-  <video id="video" controls playsinline></video>
-</div>
-
-<div class="servers">
-  <button class="btn" onclick="loadStream(0)">Server 1</button>
-  <button class="btn" onclick="loadStream(1)">Server 2</button>
-</div>
-
-<div class="quality">
-  <button class="btn qbtn" onclick="setQuality('auto')">Auto Quality</button>
-  <button class="btn qbtn" onclick="setQuality(360)">360p</button>
-  <button class="btn qbtn" onclick="setQuality(720)">720p</button>
-  <button class="btn qbtn" onclick="setQuality(1080)">1080p</button>
-</div>
+<video id="video" controls autoplay playsinline></video>
 
 <script>
-let player;
-const video = document.getElementById("video");
+const url = "https://a201aivottlinear-a.akamaihd.net/OTTB/lhr-nitro/clients/dash/enc/f60kqesunw/out/v1/a435ed7a00f947deb4369b46d8f2fb70/cenc.mpd?8";
 
-const streams = [
-  "http://103.169.98.238:8080/live/0300511616RGB/0300511616RGB/247170.ts?token=dG5HV0NNYW93WUJwTFpk",
-  "https://example.com/live2.mpd"
-];
+const player = dashjs.MediaPlayer().create();
+player.initialize(document.querySelector("#video"), url, true);
 
-async function init(){
-  shaka.polyfill.installAll();
-  if(!shaka.Player.isBrowserSupported()){
-    alert("Browser not supported");
-    return;
+// Auto quality + manual support ready
+player.updateSettings({
+  streaming: {
+    abr: {
+      autoSwitchBitrate: {
+        video: true
+      }
+    }
   }
-  player = new shaka.Player(video);
-  loadStream(0);
-}
-
-async function loadStream(index){
-  try{
-    await player.load(streams[index]);
-    video.play();
-  }catch(e){
-    console.error("DASH error", e);
-    alert("Stream load failed");
-  }
-}
-
-function setQuality(q){
-  if(!player) return;
-  if(q === "auto"){
-    player.configure({abr:{enabled:true}});
-  }else{
-    player.configure({abr:{enabled:false}});
-    const tracks = player.getVariantTracks();
-    const match = tracks.find(t=>t.height===q);
-    if(match) player.selectVariantTrack(match,true);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", init);
+});
 </script>
 
 </body>
